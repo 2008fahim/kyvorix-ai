@@ -6,6 +6,12 @@
 // reach the browser.
 // ============================================================================
 
+// NOTE: everything below is wrapped in an IIFE. The Supabase UMD build
+// declares a global `var supabase`; a top-level `let supabase` here would
+// collide with it (SyntaxError: Identifier 'supabase' has already been
+// declared) and kill the WHOLE script before any button works — that is
+// exactly why the Register tab did nothing on 2026-11-17.
+(function () {
 const cfg = window.KYVORIX_CONFIG;
 // Guard: if the Supabase CDN fails to load (offline), keep the auth view
 // visible with a clear message instead of a blank page.
@@ -879,3 +885,6 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
+
+})();
