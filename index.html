@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kyvorix Ai — আপনার AI সহকারী</title>
+<meta name="description" content="Kyvorix Ai — ChatGPT-এর মতো বাংলা AI চ্যাট। প্রশ্ন করুন, উত্তর পান।" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B1220'/%3E%3Ctext x='32' y='42' font-size='28' font-family='Arial' font-weight='bold' fill='%237C3AED' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ============================ AUTH VIEW ============================ -->
+<div id="auth-view" class="auth-view">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-mark">K</div>
+      <div class="logo-text">KYVORIX <span>Ai</span></div>
+      <p class="logo-sub">Developer Studio</p>
+    </div>
+    <h1 class="auth-title">আপনার AI সহকারী</h1>
+    <p class="auth-desc">প্রশ্ন করুন বাংলায় — উত্তর পান মুহূর্তেই।</p>
+
+    <div class="auth-tabs">
+      <button id="tab-login" class="auth-tab active" type="button">লগইন</button>
+      <button id="tab-register" class="auth-tab" type="button">রেজিস্টার</button>
+    </div>
+
+    <form id="auth-form" autocomplete="on">
+      <div id="name-field" class="field hidden">
+        <label for="auth-name">আপনার নাম</label>
+        <input id="auth-name" type="text" placeholder="যেমন: ফাহিম" />
+      </div>
+      <div class="field">
+        <label for="auth-email">ইমেইল</label>
+        <input id="auth-email" type="email" placeholder="you@example.com" required />
+      </div>
+      <div class="field">
+        <label for="auth-password">পাসওয়ার্ড</label>
+        <input id="auth-password" type="password" placeholder="কমপক্ষে ৬ অক্ষর" required minlength="6" />
+      </div>
+      <p id="auth-error" class="form-error hidden"></p>
+      <p id="auth-success" class="form-success hidden"></p>
+      <button id="auth-submit" class="btn-primary btn-block" type="submit">লগইন করুন</button>
+    </form>
+
+    <p class="auth-foot">Kyvorix Ai &middot; fayem.top &middot; রাজশাহী, বাংলাদেশ</p>
+  </div>
+</div>
+
+<!-- ============================ APP VIEW ============================ -->
+<div id="app-view" class="app hidden">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-top">
+      <div class="brand">
+        <div class="logo-mark small">K</div>
+        <div>
+          <div class="brand-name">KYVORIX <span>Ai</span></div>
+          <div class="brand-sub">Developer Studio</div>
+        </div>
+      </div>
+      <button id="sidebar-close" class="icon-btn only-mobile" type="button" aria-label="বন্ধ করুন">&times;</button>
+    </div>
+
+    <button id="new-chat-btn" class="btn-new-chat" type="button">
+      <span class="plus">+</span> নতুন চ্যাট
+    </button>
+
+    <div class="chat-list-label">আপনার চ্যাট</div>
+    <nav id="chat-list" class="chat-list"></nav>
+
+    <div class="sidebar-bottom">
+      <button id="admin-open-btn" class="btn-admin hidden" type="button">⚙️ অ্যাডমিন প্যানেল</button>
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">ফ</div>
+        <div class="user-meta">
+          <div id="user-name" class="user-name">—</div>
+          <div id="user-email" class="user-email">—</div>
+        </div>
+        <button id="logout-btn" class="icon-btn" type="button" title="লগআউট">⎋</button>
+      </div>
+    </div>
+  </aside>
+  <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="main-header">
+      <button id="sidebar-open" class="icon-btn only-mobile" type="button" aria-label="মেনু">☰</button>
+      <div class="main-title">Kyvorix Ai</div>
+      <div class="main-badge">Beta</div>
+    </header>
+
+    <!-- Chat view -->
+    <section id="chat-view" class="chat-view">
+      <div id="messages" class="messages"></div>
+
+      <div id="empty-state" class="empty-state">
+        <div class="empty-logo">K</div>
+        <h2>আসসালামু আলাইকুম! 👋</h2>
+        <p>আমি Kyvorix Ai — আপনার AI সহকারী। যেকোনো প্রশ্ন করুন বাংলায় বা ইংরেজিতে।</p>
+        <div class="suggestions">
+          <button class="suggestion" type="button">বাংলাদেশের ইতিহাস সম্পর্কে বলো</button>
+          <button class="suggestion" type="button">একটা সুন্দর কবিতা লেখো</button>
+          <button class="suggestion" type="button">Python-এ Hello World কিভাবে লিখবো?</button>
+          <button class="suggestion" type="button">ভালোভাবে পড়াশোনার টিপস দাও</button>
+        </div>
+      </div>
+
+      <div class="composer-wrap">
+        <form id="composer" class="composer">
+          <textarea id="message-input" rows="1" placeholder="মেসেজ লিখুন..." maxlength="8000"></textarea>
+          <button id="send-btn" class="send-btn" type="submit" aria-label="পাঠান">➤</button>
+        </form>
+        <p class="composer-note">Kyvorix Ai ভুল তথ্য দিতে পারে — গুরুত্বপূর্ণ বিষয়ে যাচাই করুন।</p>
+      </div>
+    </section>
+
+    <!-- Admin view -->
+    <section id="admin-view" class="admin-view hidden">
+      <div class="admin-header">
+        <h2>⚙️ অ্যাডমিন প্যানেল</h2>
+        <button id="admin-close-btn" class="btn-ghost" type="button">← চ্যাটে ফিরুন</button>
+      </div>
+
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="dashboard" type="button">📊 ড্যাশবোর্ড</button>
+        <button class="admin-tab" data-tab="users" type="button">👥 ইউজার ম্যানেজমেন্ট</button>
+        <button class="admin-tab" data-tab="apis" type="button">🔑 API সেটআপ</button>
+        <button class="admin-tab" data-tab="logs" type="button">📋 ব্যবহারের লগ</button>
+      </div>
+
+      <!-- Dashboard tab -->
+      <div id="admin-tab-dashboard" class="admin-tabpane">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-num" id="stat-users">—</div><div class="stat-label">মোট ইউজার</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-chats">—</div><div class="stat-label">মোট চ্যাট</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-messages-today">—</div><div class="stat-label">আজকের মেসেজ</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-providers">—</div><div class="stat-label">চালু API</div></div>
+          <div class="stat-card danger"><div class="stat-num" id="stat-failed-today">—</div><div class="stat-label">আজ ব্যর্থ কল</div></div>
+        </div>
+        <h3 class="section-title">সাম্প্রতিক ব্যবহার</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>সময়</th><th>ইউজার</th><th>মডেল</th><th>অবস্থা</th></tr></thead>
+            <tbody id="recent-usage-body"><tr><td colspan="4">লোড হচ্ছে…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Users tab -->
+      <div id="admin-tab-users" class="admin-tabpane hidden">
+        <div class="toolbar">
+          <input id="user-search" type="search" placeholder="ইমেইল বা নাম দিয়ে খুঁজুন…" />
+          <button id="users-refresh" class="btn-ghost" type="button">↻ রিফ্রেশ</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>ইউজার</th><th>রোল</th><th>যোগদান</th><th>অবস্থা</th><th>অ্যাকশন</th></tr></thead>
+            <tbody id="users-body"><tr><td colspan="5">লোড হচ্ছে…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- APIs tab -->
+      <div id="admin-tab-apis" class="admin-tabpane hidden">
+        <p class="hint">
+          একাধিক AI API যোগ করুন। <b>Priority</b> যত কম, সেটা তত আগে চেষ্টা করা হবে —
+          একটা API নষ্ট হলে পরেরটা নিজে থেকেই চালু হবে (failover)।
+          API চাবি শুধু অ্যাডমিন দেখতে পারে, ইউজারের ব্রাউজারে কখনো যায় না।
+        </p>
+        <div class="toolbar">
+          <button id="provider-add-btn" class="btn-primary" type="button">+ নতুন API যোগ করুন</button>
+          <button id="providers-refresh" class="btn-ghost" type="button">↻ রিফ্রেশ</button>
+        </div>
+        <div id="provider-list" class="provider-list"></div>
+
+        <form id="provider-form" class="provider-form hidden">
+          <h3 id="provider-form-title">নতুন API</h3>
+          <input type="hidden" id="pf-id" />
+          <div class="form-grid">
+            <div class="field"><label for="pf-name">নাম</label><input id="pf-name" type="text" placeholder="যেমন: Gemini প্রধান" required /></div>
+            <div class="field"><label for="pf-type">ধরন</label>
+              <select id="pf-type">
+                <option value="gemini">Gemini</option>
+                <option value="groq">Groq</option>
+                <option value="openai">OpenAI</option>
+                <option value="other">অন্যান্য (OpenAI-compatible)</option>
+              </select>
+            </div>
+            <div class="field"><label for="pf-model">মডেল</label><input id="pf-model" type="text" placeholder="যেমন: gemini-2.5-flash" required /></div>
+            <div class="field"><label for="pf-priority">Priority (কম = আগে)</label><input id="pf-priority" type="number" min="1" value="10" required /></div>
+            <div class="field span-2"><label for="pf-base-url">Base URL (খালি রাখলে ধরন অনুযায়ী ডিফল্ট)</label><input id="pf-base-url" type="url" placeholder="https://generativelanguage.googleapis.com/v1beta/openai/" /></div>
+            <div class="field span-2"><label for="pf-api-key">API Key</label><input id="pf-api-key" type="password" placeholder="API চাবি লিখুন" autocomplete="off" /></div>
+          </div>
+          <p id="provider-form-error" class="form-error hidden"></p>
+          <div class="form-actions">
+            <button class="btn-primary" type="submit">সংরক্ষণ করুন</button>
+            <button id="provider-form-cancel" class="btn-ghost" type="button">বাতিল</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Logs tab -->
+      <div id="admin-tab-logs" class="admin-tabpane hidden">
+        <div class="toolbar">
+          <select id="log-filter">
+            <option value="all">সবগুলো</option>
+            <option value="ok">সফল</option>
+            <option value="failed">ব্যর্থ</option>
+          </select>
+          <button id="logs-refresh" class="btn-ghost" type="button">↻ রিফ্রেশ</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>সময়</th><th>ইউজার</th><th>মডেল</th><th>অবস্থা</th><th>ত্রুটি</th></tr></thead>
+            <tbody id="logs-body"><tr><td colspan="5">লোড হচ্ছে…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
